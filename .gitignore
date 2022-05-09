@@ -1,1 +1,15 @@
 /target
+/.cargo
+/.rustup
+/.vscode
+/.cache
+/.vscode-server
+/.p10k.zsh
+/.profile
+/.wget-hsts
+/.zsh*
+/.zcompdump
+/lsd*
+/.gitconfig
+/powerlevel10k
+/.devcontainer
