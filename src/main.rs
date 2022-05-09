@@ -1,7 +1,49 @@
 use std::fs::File;
 use std::io::{BufRead, self};
-// use std::io::prelude::*;
-// use std::path::Path;
+use std::collections::HashMap;
+
+struct RegexDefinitions {
+    definitions: HashMap<String, String>
+}
+impl RegexDefinitions {
+    pub fn new() -> RegexDefinitions {
+        RegexDefinitions {
+            definitions: HashMap::new()
+        }
+    }
+    pub fn insert(&mut self, key: String, value: String) {
+        self.definitions.insert(key, value);
+    }
+}
+
+struct ParseBuilder<'a> {
+    text: &'a String,
+    state: &'a ParseLexFileState,
+}
+impl ParseBuilder<'_> {
+    pub fn new<'a>(text: &'a String, state: &'a ParseLexFileState) -> ParseBuilder<'a> {
+        ParseBuilder {
+            text,
+            state,
+        }
+    }
+
+    pub fn exec(&self, definitions: &mut RegexDefinitions) {
+        println!("text {} state {:?}", self.text, self.state);
+        match self.state {
+            ParseLexFileState::Declaration => {
+                let mut iter = self.text.splitn(2, ' ');
+                if let Some(key) = iter.next() {
+                    if let Some(value) = iter.next() {
+                        definitions.insert(key.to_string(), value.trim().to_string());
+                    }
+                }
+            },
+            ParseLexFileState::Rule => {},
+            ParseLexFileState::Helper => {},
+        }
+    }
+}
 
 #[derive(Debug)]
 enum ParseLexFileState {
@@ -9,15 +51,31 @@ enum ParseLexFileState {
     Rule,
     Helper,
 }
+impl ParseLexFileState {
+    pub fn change(&mut self) {
+        match self {
+           ParseLexFileState::Declaration => {
+               *self = ParseLexFileState::Rule;
+           },
+           ParseLexFileState::Rule => {
+               *self = ParseLexFileState::Helper;
+           },
+           ParseLexFileState::Helper => { /* nop */ },
+        }
+    }
+}
+
 struct ParseLexFile {
     filename: String,
     state: ParseLexFileState,
+    regex_definitions: RegexDefinitions,
 }
 impl ParseLexFile {
     pub fn new(filename: impl Into<String>) -> ParseLexFile {
         ParseLexFile {
             filename: filename.into(),
             state: ParseLexFileState::Declaration,
+            regex_definitions: RegexDefinitions::new(),
         }
     }
 
@@ -25,22 +83,18 @@ impl ParseLexFile {
         if let Ok(lines) = self.read_lines() {
             for line in lines {
                 if let Ok(text) = line {
+                    if text.trim().is_empty() {
+                        continue;
+                    }
                     if text == "%%" {
-                        match self.state {
-                           ParseLexFileState::Declaration => {
-                               self.state = ParseLexFileState::Rule;
-                           },
-                           ParseLexFileState::Rule => {
-                               self.state = ParseLexFileState::Helper;
-                           },
-                           ParseLexFileState::Helper => { /* nop */ },
-                        }
+                        self.state.change();
                     } else {
-                        println!("text {} state {:?}", text, self.state);
+                        ParseBuilder::new(&text, &self.state).exec(&mut self.regex_definitions);
                     }
                 }
             }
         }
+        println!("defs: {:?}", self.regex_definitions.definitions);
     }
 
     fn read_lines(&self) -> io::Result<io::Lines<io::BufReader<File>>> {
