@@ -28,7 +28,7 @@ impl LineTextParser<'_> {
         }
     }
 
-    pub fn exec(&self, definitions: &mut RegexDefinitions) {
+    pub fn build(&self, definitions: &mut RegexDefinitions) {
         println!("line_text {} state {:?}", self.line_text, self.state);
         match self.state {
             ParseLexFileState::Declaration => {
@@ -89,7 +89,7 @@ impl LexParser {
                     if text == "%%" {
                         self.change_state();
                     } else {
-                        LineTextParser::new(&text, &self.state).exec(&mut self.regex_definitions);
+                        LineTextParser::new(&text, &self.state).build(&mut self.regex_definitions);
                     }
                 }
             }
