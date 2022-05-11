@@ -1,18 +1,37 @@
 use std::fs::File;
 use std::io::{BufRead, self};
 use std::collections::HashMap;
+use regex::Regex;
 
 struct RegexDefinitions {
-    definitions: HashMap<String, String>
+    definitions: HashMap<String, String>,
+    resolved_definitions: HashMap<String, String>,
 }
 impl RegexDefinitions {
     pub fn new() -> Self {
         Self {
-            definitions: HashMap::new()
+            definitions: HashMap::new(),
+            resolved_definitions: HashMap::new(),
         }
     }
     pub fn insert(&mut self, key: String, value: String) {
         self.definitions.insert(key, value);
+    }
+
+    pub fn resolve(&self, value: &str) -> String {
+        let re = Regex::new(r"\{(\w+)\}").unwrap();
+        let mut ret  = value.to_string();
+        for caps in re.captures_iter(value) {
+            let captured_text = caps.get(1).unwrap().as_str();
+            if let Some(resolved) = self.definitions.get(captured_text) {
+                let target = format!("\\{{{}\\}}", captured_text);
+                let rere = Regex::new(target.as_str()).unwrap();
+                let ret2 = ret.to_string();
+                let after = rere.replace_all(ret2.as_str() , resolved);
+                ret = after.to_string();
+            }
+        }
+        ret
     }
 }
 
@@ -35,7 +54,10 @@ impl LineTextParser<'_> {
                 let mut iter = self.line_text.splitn(2, ' ');
                 if let Some(key) = iter.next() {
                     if let Some(value) = iter.next() {
-                        definitions.insert(key.to_string(), value.trim().to_string());
+                        let value = value.trim();
+                        definitions.insert(key.to_string(), value.to_string());
+                        definitions.resolved_definitions.insert(key.to_string(), 
+                        definitions.resolve(&value.to_string()));
                     }
                 }
             },
@@ -95,6 +117,7 @@ impl LexParser {
             }
         }
         println!("defs: {:?}", self.regex_definitions.definitions);
+        println!("resolved defs {:?}", self.regex_definitions.resolved_definitions);
     }
 
     fn read_lines(&self) -> io::Result<io::Lines<io::BufReader<File>>> {
@@ -128,5 +151,20 @@ mod tests {
         let mut instance = LexParser::new("lex.l");
         instance.change_state();
         assert_ne!(instance.state, ParseLexFileState::Declaration);
+    }
+
+    #[test]
+    fn resolve_success() {
+        let mut reg_defs = RegexDefinitions::new(); 
+        reg_defs.definitions.insert("resolve1".to_string(), "a".to_string());
+        reg_defs.definitions.insert("resolve2".to_string(), "b".to_string());
+        assert_eq!(reg_defs.resolve("x{resolve1}y{resolve2}z"), "xaybz".to_string());
+    }
+
+    #[test]
+    fn resolve_not_success() {
+        let mut reg_defs = RegexDefinitions::new(); 
+        reg_defs.definitions.insert("resolve".to_string(), "a".to_string());
+        assert_eq!(reg_defs.resolve("{not_resolve}"), "{not_resolve}".to_string());
     }
 }
