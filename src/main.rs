@@ -65,12 +65,12 @@ impl ParseLexFileState {
     }
 }
 
-struct ParseLexFile {
+struct LexParser {
     filename: String,
     state: ParseLexFileState,
     regex_definitions: RegexDefinitions,
 }
-impl ParseLexFile {
+impl LexParser {
     pub fn new(filename: impl Into<String>) -> Self {
         Self {
             filename: filename.into(),
@@ -104,7 +104,7 @@ impl ParseLexFile {
 
 }
 fn main() {
-    let lex = ParseLexFile::new("lex.l");
+    let lex = LexParser::new("lex.l");
     lex.parse();
 }
 
