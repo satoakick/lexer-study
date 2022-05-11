@@ -6,8 +6,8 @@ struct RegexDefinitions {
     definitions: HashMap<String, String>
 }
 impl RegexDefinitions {
-    pub fn new() -> RegexDefinitions {
-        RegexDefinitions {
+    pub fn new() -> Self {
+        Self {
             definitions: HashMap::new()
         }
     }
@@ -71,8 +71,8 @@ struct ParseLexFile {
     regex_definitions: RegexDefinitions,
 }
 impl ParseLexFile {
-    pub fn new(filename: impl Into<String>) -> ParseLexFile {
-        ParseLexFile {
+    pub fn new(filename: impl Into<String>) -> Self {
+        Self {
             filename: filename.into(),
             state: ParseLexFileState::Declaration,
             regex_definitions: RegexDefinitions::new(),
