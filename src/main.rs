@@ -27,18 +27,18 @@ impl RegexDefinitions {
 
     pub fn resolve(&self, value: &str) -> String {
         let re = Regex::new(r"\{(\w+)\}").unwrap();
-        let mut ret  = value.to_string();
+        let mut resolved = value.to_string();
         for caps in re.captures_iter(value) {
             let captured_text = caps.get(1).unwrap().as_str();
-            if let Some(resolved) = self.definitions.get(captured_text) {
+            if let Some(value) = self.definitions.get(captured_text) {
                 let target = format!("\\{{{}\\}}", captured_text);
                 let rere = Regex::new(target.as_str()).unwrap();
-                let ret2 = ret.to_string();
-                let after = rere.replace_all(ret2.as_str() , resolved);
-                ret = after.to_string();
+                let ret2 = resolved.to_string();
+                let after = rere.replace_all(ret2.as_str() , value);
+                resolved = after.to_string();
             }
         }
-        ret
+        resolved
     }
 }
 
