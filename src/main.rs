@@ -16,23 +16,23 @@ impl RegexDefinitions {
     }
 }
 
-struct ParseBuilder<'a> {
-    text: &'a String,
+struct LineTextParser<'a> {
+    line_text: &'a String,
     state: &'a ParseLexFileState,
 }
-impl ParseBuilder<'_> {
-    pub fn new<'a>(text: &'a String, state: &'a ParseLexFileState) -> ParseBuilder<'a> {
-        ParseBuilder {
-            text,
+impl LineTextParser<'_> {
+    pub fn new<'a>(line_text: &'a String, state: &'a ParseLexFileState) -> LineTextParser<'a> {
+        LineTextParser {
+            line_text,
             state,
         }
     }
 
     pub fn exec(&self, definitions: &mut RegexDefinitions) {
-        println!("text {} state {:?}", self.text, self.state);
+        println!("line_text {} state {:?}", self.line_text, self.state);
         match self.state {
             ParseLexFileState::Declaration => {
-                let mut iter = self.text.splitn(2, ' ');
+                let mut iter = self.line_text.splitn(2, ' ');
                 if let Some(key) = iter.next() {
                     if let Some(value) = iter.next() {
                         definitions.insert(key.to_string(), value.trim().to_string());
@@ -89,7 +89,7 @@ impl LexParser {
                     if text == "%%" {
                         self.change_state();
                     } else {
-                        ParseBuilder::new(&text, &self.state).exec(&mut self.regex_definitions);
+                        LineTextParser::new(&text, &self.state).exec(&mut self.regex_definitions);
                     }
                 }
             }
