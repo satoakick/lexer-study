@@ -45,7 +45,7 @@ impl ParseBuilder<'_> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum ParseLexFileState {
     Declaration,
     Rule,
@@ -108,3 +108,9 @@ fn main() {
     lex.parse();
 }
 
+#[test]
+fn new_test() {
+    let instance = LexParser::new("lex.l");
+    assert_eq!(instance.state, ParseLexFileState::Declaration);
+    assert_eq!(instance.filename, "lex.l");
+}
