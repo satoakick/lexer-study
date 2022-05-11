@@ -87,7 +87,7 @@ impl LexParser {
                         continue;
                     }
                     if text == "%%" {
-                        self.state.change();
+                        self.change_state();
                     } else {
                         ParseBuilder::new(&text, &self.state).exec(&mut self.regex_definitions);
                     }
@@ -102,6 +102,10 @@ impl LexParser {
         Ok(io::BufReader::new(file).lines())
     }
 
+    fn change_state(&mut self) {
+        self.state.change();
+    }
+
 }
 fn main() {
     let lex = LexParser::new("lex.l");
@@ -113,4 +117,11 @@ fn new_test() {
     let instance = LexParser::new("lex.l");
     assert_eq!(instance.state, ParseLexFileState::Declaration);
     assert_eq!(instance.filename, "lex.l");
+}
+
+#[test]
+fn change_state_test() {
+    let mut instance = LexParser::new("lex.l");
+    instance.change_state();
+    assert_ne!(instance.state, ParseLexFileState::Declaration);
 }
