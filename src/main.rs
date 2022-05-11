@@ -107,21 +107,26 @@ impl LexParser {
     }
 
 }
+
 fn main() {
     let lex = LexParser::new("lex.l");
     lex.parse();
 }
 
-#[test]
-fn new_test() {
-    let instance = LexParser::new("lex.l");
-    assert_eq!(instance.state, ParseLexFileState::Declaration);
-    assert_eq!(instance.filename, "lex.l");
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn new_test() {
+        let instance = LexParser::new("lex.l");
+        assert_eq!(instance.state, ParseLexFileState::Declaration);
+        assert_eq!(instance.filename, "lex.l");
+    }
 
-#[test]
-fn change_state_test() {
-    let mut instance = LexParser::new("lex.l");
-    instance.change_state();
-    assert_ne!(instance.state, ParseLexFileState::Declaration);
+    #[test]
+    fn change_state_test() {
+        let mut instance = LexParser::new("lex.l");
+        instance.change_state();
+        assert_ne!(instance.state, ParseLexFileState::Declaration);
+    }
 }
