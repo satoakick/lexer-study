@@ -14,8 +14,15 @@ impl RegexDefinitions {
             resolved_definitions: HashMap::new(),
         }
     }
+
     pub fn insert(&mut self, key: String, value: String) {
-        self.definitions.insert(key, value);
+        self.definitions.insert(key.to_string(), value.to_string());
+
+        // Note that definitions is resolved to regex by every time when this method is called,
+        self.resolved_definitions.insert(
+            key.to_string(), 
+            self.resolve(&value.to_string())
+        );
     }
 
     pub fn resolve(&self, value: &str) -> String {
@@ -54,10 +61,7 @@ impl LineTextParser<'_> {
                 let mut iter = self.line_text.splitn(2, ' ');
                 if let Some(key) = iter.next() {
                     if let Some(value) = iter.next() {
-                        let value = value.trim();
-                        definitions.insert(key.to_string(), value.to_string());
-                        definitions.resolved_definitions.insert(key.to_string(), 
-                        definitions.resolve(&value.to_string()));
+                        definitions.insert(key.to_string(), value.trim().to_string());
                     }
                 }
             },
