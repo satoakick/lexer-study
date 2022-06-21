@@ -8,14 +8,14 @@ struct RegexDefinitions {
     resolved_definitions: HashMap<String, String>,
 }
 impl RegexDefinitions {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             definitions: HashMap::new(),
             resolved_definitions: HashMap::new(),
         }
     }
 
-    pub fn insert(&mut self, key: String, value: String) {
+    fn insert(&mut self, key: String, value: String) {
         self.definitions.insert(key.to_string(), value.to_string());
 
         // Note that definitions is resolved to regex by every time when this method is called,
@@ -25,7 +25,7 @@ impl RegexDefinitions {
         );
     }
 
-    pub fn resolve(&self, value: &str) -> String {
+    fn resolve(&self, value: &str) -> String {
         let re = Regex::new(r"\{(\w+)\}").unwrap();
         let mut resolved = value.to_string();
         for caps in re.captures_iter(value) {
@@ -47,14 +47,14 @@ struct LineTextParser<'a> {
     state: &'a ParseLexFileState,
 }
 impl LineTextParser<'_> {
-    pub fn new<'a>(line_text: &'a String, state: &'a ParseLexFileState) -> LineTextParser<'a> {
+    fn new<'a>(line_text: &'a String, state: &'a ParseLexFileState) -> LineTextParser<'a> {
         LineTextParser {
             line_text,
             state,
         }
     }
 
-    pub fn build(&self, definitions: &mut RegexDefinitions) {
+    fn build(&self, definitions: &mut RegexDefinitions) {
         println!("line_text {} state {:?}", self.line_text, self.state);
         match self.state {
             ParseLexFileState::Declaration => {
@@ -78,7 +78,7 @@ enum ParseLexFileState {
     Helper,
 }
 impl ParseLexFileState {
-    pub fn change(&mut self) {
+    fn change(&mut self) {
         match self {
            ParseLexFileState::Declaration => {
                *self = ParseLexFileState::Rule;
@@ -163,7 +163,7 @@ struct Token {
     kind: TokenKind,
 }
 impl Token {
-    pub fn new(value: Option<char>, kind: TokenKind) -> Self {
+    fn new(value: Option<char>, kind: TokenKind) -> Self {
         Self {
             value,
             kind,
@@ -175,13 +175,13 @@ struct Lexer {
     chars: Vec<char>
 }
 impl Lexer {
-    pub fn new(str: String) -> Self {
+    fn new(str: String) -> Self {
         Self {
             chars: str.chars().collect()
         }
     }
 
-    pub fn scan(&mut self) -> Token {
+    fn scan(&mut self) -> Token {
         if let Some(ch) = self.chars.pop() {
             Token::new(Some(ch), TokenKind::parse(ch))
         } else {
