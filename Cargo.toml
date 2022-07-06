@@ -1,5 +1,5 @@
 [package]
-name = "insomnia"
+name = "lexer-study"
 version = "0.1.0"
 edition = "2021"
 
