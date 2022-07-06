@@ -135,61 +135,6 @@ impl LexParser {
 
 }
 
-#[derive(Debug, PartialEq)]
-pub enum TokenKind {
-    Character,
-    Or,
-    Wildcard,
-    Lparen,
-    Rparen,
-    Eof
-}
-impl TokenKind {
-
-    fn parse(ch: char) -> Self {
-        match ch {
-            '|' => Self::Or,
-            '*' => Self::Wildcard,
-            '(' => Self::Lparen,
-            ')' => Self::Rparen,
-             _  => Self::Character
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-struct Token {
-    value: Option<char>,
-    kind: TokenKind,
-}
-impl Token {
-    fn new(value: Option<char>, kind: TokenKind) -> Self {
-        Self {
-            value,
-            kind,
-        }
-    }
-}
-
-struct Lexer {
-    chars: Vec<char>
-}
-impl Lexer {
-    fn new(str: String) -> Self {
-        Self {
-            chars: str.chars().collect()
-        }
-    }
-
-    fn scan(&mut self) -> Token {
-        if let Some(ch) = self.chars.pop() {
-            Token::new(Some(ch), TokenKind::parse(ch))
-        } else {
-            Token::new(None, TokenKind::Eof)
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -221,34 +166,5 @@ mod tests {
         let mut reg_defs = RegexDefinitions::new(); 
         reg_defs.definitions.insert("resolve".to_string(), "a".to_string());
         assert_eq!(reg_defs.resolve("{not_resolve}"), "{not_resolve}".to_string());
-    }
-
-    #[test]
-    fn token_kind_parse_or() {
-        assert_eq!(TokenKind::parse('|'), TokenKind::Or);
-    }
-    #[test]
-    fn token_kind_parse_wildcard() {
-        assert_eq!(TokenKind::parse('*'), TokenKind::Wildcard);
-    }
-    #[test]
-    fn token_kind_parse_rparen() {
-        assert_eq!(TokenKind::parse(')'), TokenKind::Rparen);
-    }
-    #[test]
-    fn token_kind_parse_lparen() {
-        assert_eq!(TokenKind::parse('('), TokenKind::Lparen);
-    }
-
-    #[test]
-    fn token_init() {
-        assert_eq!(Token::new(Some('a'), TokenKind::Character),
-                   Token { value: Some('a'), kind: TokenKind::Character })
-    }
-
-    #[test]
-    fn lexer_init() {
-        let lexer = Lexer::new(String::from("foo"));
-        assert_eq!(lexer.chars, vec!['f','o','o']);
     }
 }
