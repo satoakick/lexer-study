@@ -1,4 +1,4 @@
-# insomnia
+# lexer-study
 
 ## これは何？
 - lexライクな字句解析生成器(を作ろうとしている)
